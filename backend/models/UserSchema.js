@@ -1,10 +1,9 @@
-import mongoose from "mongoose"
+const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-    fullname: {
+    fullName: {
         type: String,
         required: true,
-        maxlength: 50,
     },
     email: {
         type: String,
@@ -26,6 +25,10 @@ const userSchema = new mongoose.Schema({
         enum: ['applicant', 'recruiter'],
         default: 'applicant'
     },
+    profile:{
+        type: String,
+        required:false,
+    },
     createdAt: {
         type: Date,
         default: Date.now
@@ -34,7 +37,7 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.models.User || mongoose.model("User", userSchema);
 
-export default User;
+module.exports = User;
 
 
 
