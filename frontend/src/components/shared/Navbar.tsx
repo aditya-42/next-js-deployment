@@ -1,0 +1,224 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { LogOut, Edit2, MoreHorizontal, Menu, X } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+
+interface User {
+  fullname: string;
+  role: "recruiter" | "applicant" | "admin";
+  profile?: string;
+}
+
+const Navbar: React.FC = () => {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [user, setUser] = useState<User | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const userDetails = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
+
+    if (userDetails && token) {
+      setUser(JSON.parse(userDetails));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    router.push("/auth/login");
+  };
+
+  const isActive = (path: string) =>
+    pathname === path ? "text-[#6A38C2] font-semibold border-b-2 border-[#6A38C2]" : "text-gray-600";
+
+  return (
+    <nav className="bg-white shadow-lg">
+      <div className="flex items-center justify-between max-w-7xl mx-auto h-16 px-6 lg:px-8">
+        {/* Logo */}
+        <Link href={user?.role === "recruiter" ? "/recruiter-portal/RecruiterHeroSection" : "/"} className="text-3xl font-bold text-[#F83002]">
+          Job<span className="text-black">Portal</span>
+        </Link>
+
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center gap-8">
+          <ul className="flex items-center gap-6 font-medium">
+            {user?.role === "recruiter" ? (
+              <>
+                <li>
+                  <Link href="/recruiter-portal/jobposting-welcome" className={`text-lg hover:text-[#6A38C2] transition duration-200 ${isActive("/recruiter-portal/jobposting-welcome")}`}>
+                    Post a Job
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/recruiter-portal/getAllJobs" className={`text-lg hover:text-[#6A38C2] transition duration-200 ${isActive("/recruiter-portal/getAllJobs")}`}>
+                    Manage Applications
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/" className={`text-lg hover:text-[#6A38C2] transition duration-200 ${isActive("/")}`}>
+                    Job Analytics
+                  </Link>
+                </li>
+              </>
+            ) : user?.role === "applicant" ? (
+              <>
+                <li>
+                  <Link href="/" className={`text-lg hover:text-[#6A38C2] transition duration-200 ${isActive("/")}`}>
+                    Home
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/jobposting" className={`text-lg hover:text-[#6A38C2] transition duration-200 ${isActive("/jobposting")}`}>
+                    Browse Jobs
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/user-profile" className={`text-lg hover:text-[#6A38C2] transition duration-200 ${isActive("/user-profile")}`}>
+                    My Applications
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/" className={`text-lg hover:text-[#6A38C2] transition duration-200 ${isActive("/resume-builder")}`}>
+                    Resume Builder
+                  </Link>
+                </li>
+              </>
+            ) : null}
+
+            {!user && (
+              <li>
+                <Link href="/jobposting" className={`text-lg hover:text-[#6A38C2] transition duration-200 ${isActive("/jobposting")}`}>
+                  Browse Jobs
+                </Link>
+              </li>
+            )}
+          </ul>
+
+          {/* User Actions */}
+          {!user ? (
+            <div className="flex items-center gap-3">
+              <Link href="/auth/login">
+                <Button className="bg-[#6A38C2]">Login</Button>
+              </Link>
+              <Link href="/auth/signup">
+                <Button className="bg-[#6A38C2]">Signup</Button>
+              </Link>
+            </div>
+          ) : (
+            <div className="flex items-center gap-4">
+              <Avatar>
+                <AvatarImage src="https://github.com/shadcn.png" />
+              </Avatar>
+
+              <Popover>
+                <PopoverTrigger>
+                  <MoreHorizontal />
+                </PopoverTrigger>
+                <PopoverContent className="w-32">
+                  <div className="flex items-center gap-2 w-fit cursor-pointer">
+                    <Edit2 className="w-4" />
+                    <span>Edit Profile</span>
+                  </div>
+                </PopoverContent>
+              </Popover>
+
+              <Button className="bg-[#6A38C2] text-white flex items-center gap-2" onClick={handleLogout}>
+                <LogOut />
+                Logout
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* Mobile Menu Button */}
+        <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden">
+          {menuOpen ? <X size={28} /> : <Menu size={28} />}
+        </button>
+      </div>
+
+      {/* Mobile Navigation */}
+      {menuOpen && (
+        <div className="md:hidden bg-white shadow-md">
+          <ul className="flex flex-col p-4 space-y-4">
+            {user?.role === "recruiter" ? (
+              <>
+                <li>
+                  <Link href="/recruiter-portal/jobposting-welcome" className={`block text-lg ${isActive("/recruiter-portal/jobposting-welcome")}`}>
+                    Post a Job
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/recruiter-portal/getAllJobs" className={`block text-lg ${isActive("/recruiter-portal/getAllJobs")}`}>
+                    Manage Applications
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/" className={`block text-lg ${isActive("/")}`}>
+                    Job Analytics
+                  </Link>
+                </li>
+              </>
+            ) : user?.role === "applicant" ? (
+              <>
+                <li>
+                  <Link href="/" className={`block text-lg ${isActive("/")}`}>
+                    Home
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/jobposting" className={`block text-lg ${isActive("/jobposting")}`}>
+                    Browse Jobs
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/user-profile" className={`block text-lg ${isActive("/user-profile")}`}>
+                    My Applications
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/resume-builder" className={`block text-lg ${isActive("/")}`}>
+                    Resume Builder
+                  </Link>
+                  
+                </li>
+              </>
+            ) : null}
+
+            {!user && (
+              <li>
+                <Link href="/jobposting" className={`block text-lg ${isActive("/jobposting")}`}>
+                  Browse Jobs
+                </Link>
+              </li>
+            )}
+
+            {!user ? (
+              <div className="flex flex-col gap-2 mt-4">
+                <Link href="/auth/login">
+                  <Button className="w-full bg-[#6A38C2]">Login</Button>
+                </Link>
+                <Link href="/auth/signup">
+                  <Button className="w-full bg-[#6A38C2]">Signup</Button>
+                </Link>
+              </div>
+            ) : (
+              <Button className="w-full bg-[#6A38C2] mt-4" onClick={handleLogout}>
+                <LogOut className="mr-2" />
+                Logout
+              </Button>
+            )}
+          </ul>
+        </div>
+      )}
+    </nav>
+  );
+};
+
+export default Navbar;

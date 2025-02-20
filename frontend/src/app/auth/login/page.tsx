@@ -1,0 +1,126 @@
+"use client"
+import React, { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup} from "@/components/ui/radio-group";
+import { Button } from "@/components/ui/button"
+
+//importing Navbar
+import Navbar from "../../../components/shared/Navbar"
+
+//footer
+import Footer from "../../../components/shared/Footer"
+
+import Axios from "axios";
+
+
+const LogIn: React.FC=()=> {
+
+  const[email , setEmail] = useState("");
+  const[password , setPassword] = useState("");
+  const[role , setRole] = useState("");
+ 
+
+  const handleSubmit = async(e)=>{
+    e.preventDefault();
+
+   
+
+    try {
+      const response = await Axios.post("http://localhost:5001/api/users/login", { email, password  });
+      console.log("api call has been made");
+
+      
+
+      //function to show recruiter page
+      if(response.status === 200 && response.data.user.role == "applicant" ){
+        console.log(response.data.role)
+        alert("Logged in successfully as Applicant");
+
+        //getting data from backend
+        const userEmail = response.data.user.email
+        const userDetails = response.data.user;
+        const authtoken = response.data.token;
+
+        //save the data into localstorage
+        localStorage.setItem("user", JSON.stringify(userDetails));
+        localStorage.setItem("token", authtoken);
+        localStorage.setItem('email' , userEmail);
+
+        //redirect to dashboard page
+        window.location.href = "/"; 
+        console.log(userDetails, "Inside here");
+      
+      }else if(response.status == 200 && response.data.user.role == "recruiter"){
+        console.log("I am inside the recruiter dashboard")
+        alert("Logged in successfully as Recruiter");
+
+        //getting data from backend
+        const recruiterDetails = response.data.user;
+        const authtoken = response.data.token;
+
+        //save the data into localstorage
+        localStorage.setItem("user", JSON.stringify(recruiterDetails));
+        localStorage.setItem("token", authtoken);
+
+        //redirect to dashboard page
+        window.location.href = "/recruiter-portal/RecruiterHeroSection"; 
+        console.log(recruiterDetails, "Inside Recruiter page");
+      }
+
+     
+    } catch (error) {
+      alert("Invalid credentials. Please try again.");
+    }
+  }
+
+  return (
+    <>
+
+    <Navbar/>
+    <div className="flex item-center justify-center max-w-7xl mx-auto">
+      <form
+        action=""
+        className="w-1/2 border border-black-200 rounded-md p-4 my-10"
+        onSubmit={handleSubmit}
+      >
+        <h1 className="font-bold text-xl mb-5"> Login to your Account</h1>
+        
+        <div className="my-2">
+          <Label className="font-bold">Email</Label>
+          <Input type="email" 
+           placeholder="Enter Email" 
+           required 
+           value={email}
+           onChange={(e)=>{
+          setEmail(e.target.value);
+          }}></Input>
+        </div>
+        
+        <div className="my-2">
+          <Label className="font-bold">Password</Label>
+          <Input type="password" 
+          placeholder="Enter Password"
+          required
+          value={password}
+          onChange={(e)=>{
+          setPassword(e.target.value);
+          }}>
+          </Input>
+        </div>
+        <div className="flex items-center justfy-between">
+        
+        </div>
+        
+        <Button type="submit" className="w-full my-4 bg-[#6A38C2] hover:bg-[#5a2cbf]" on>Log In</Button>
+        <span className="text-sm">Don't have an account ?<a href="/auth/signup" className="text-blue-600"> Sign up</a></span>
+      </form>
+    </div>
+
+    <Footer/>
+    </>
+  );
+}
+
+
+export default LogIn;
