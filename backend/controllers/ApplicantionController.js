@@ -68,12 +68,15 @@ exports.submitApplication = async (req, res, next) => {
 exports.getAllApplications = async (req, res) => {
     const email = req.params.email; 
 
+    console.log("Getting all applications for the user" , email)
+
     try {
        
         const applications = await Application.find({ email: email });
 
         if (!applications || applications.length === 0) {
-            return res.status(404).json({ message: "No applications found for this email" });
+            //return res.status(404).json({ message: "No applications found for this email" });
+            return res.status(200).json({ message: "No applications found for this email" });  
         }
 
         res.status(200).json(applications);

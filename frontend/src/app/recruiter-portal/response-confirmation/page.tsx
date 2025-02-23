@@ -8,6 +8,8 @@ const page = () => {
      <h2>Your response has been submitted successfully </h2>
      {/* //email confirmation to recruiter */}
 
+     {/* //node mailer or any mail protocl  */}
+
 
      <Footer/>
      

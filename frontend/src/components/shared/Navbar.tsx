@@ -14,11 +14,15 @@ interface User {
   profile?: string;
 }
 
+
+
 const Navbar: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
     const userDetails = localStorage.getItem("user");
@@ -43,7 +47,7 @@ const Navbar: React.FC = () => {
       <div className="flex items-center justify-between max-w-7xl mx-auto h-16 px-6 lg:px-8">
         {/* Logo */}
         <Link href={user?.role === "recruiter" ? "/recruiter-portal/RecruiterHeroSection" : "/"} className="text-3xl font-bold text-[#F83002]">
-          Job<span className="text-black">Portal</span>
+          Tech<span className="text-black">Titans</span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -85,9 +89,9 @@ const Navbar: React.FC = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/" className={`text-lg hover:text-[#6A38C2] transition duration-200 ${isActive("/resume-builder")}`}>
+                  {/* <Link href="/" className={`text-lg hover:text-[#6A38C2] transition duration-200 ${isActive("/resume-builder")}`}>
                     Resume Builder
-                  </Link>
+                  </Link> */}
                 </li>
               </>
             ) : null}
@@ -114,7 +118,8 @@ const Navbar: React.FC = () => {
           ) : (
             <div className="flex items-center gap-4">
               <Avatar>
-                <AvatarImage src="https://github.com/shadcn.png" />
+                <AvatarImage src={`${API_URL}/${user.profile}`} />
+                {/* <AvatarImage src="https://github.com/shadcn.png" /> */}
               </Avatar>
 
               <Popover>
@@ -163,7 +168,13 @@ const Navbar: React.FC = () => {
                   <Link href="/" className={`block text-lg ${isActive("/")}`}>
                     Job Analytics
                   </Link>
+
                 </li>
+                <Avatar>
+
+                  <AvatarImage src={`${API_URL}/${user.profile}`} />
+                </Avatar>
+
               </>
             ) : user?.role === "applicant" ? (
               <>
@@ -186,7 +197,7 @@ const Navbar: React.FC = () => {
                   <Link href="/resume-builder" className={`block text-lg ${isActive("/")}`}>
                     Resume Builder
                   </Link>
-                  
+
                 </li>
               </>
             ) : null}

@@ -294,7 +294,7 @@ const GetAllJobs: React.FC = ({ jobId}) => {
       {/* Modal for Editing Job */}
       {isModalOpen && currentJob && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-8 rounded-lg w-1/3">
+          <div className="bg-white p-8 rounded-lg w-1/3 max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-semibold mb-4">Edit Job</h2>
 
             {/* Job Form */}
