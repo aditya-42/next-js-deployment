@@ -23,11 +23,20 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 //routes
 
-//get all applications for that user
+//get all applicatins details
 router.get('/applications/:email', applicationController.getAllApplications);
+
+//get all applicants data 
+router.get('/get-applicants', applicationController.getAllApplicantDetails);
+
+//get single applicant details
+router.get('/get-applicant-details/:id', applicationController.getApplicantDetailsById);
 
 //route to apply for job
 router.post('/apply' , upload.single('resume') , applicationController.submitApplication);
+
+//delete applicant details
+router.delete('/delete-applicant/:id', applicationController.deleteApplication);
 
 
 module.exports = router;

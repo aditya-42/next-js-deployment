@@ -13,6 +13,10 @@ const applicationSchema = new mongoose.Schema({
      type: Number,
      required: true
    },
+   appliedJobRole:{
+     type: String,
+     default:'N/A',
+   },
    education:{
      type: String,
      required: true

@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 import {
   Table,
   TableBody,
@@ -17,7 +18,9 @@ import { Edit2, Trash2, MoreHorizontal } from "lucide-react";
 import Navbar from "@/components/shared/Navbar";
 import axios from "axios";
 
-import { useState, useEffect , FormEvent , useCallback } from "react";
+import {useRouter} from "next/navigation";
+
+import { useState, useEffect, FormEvent, useCallback } from "react";
 
 // Interface for job and applicant
 export interface Job {
@@ -41,15 +44,17 @@ export interface Applicant {
   _id: string;
   fullName: string;
   email: string;
-  role: string;
+  appliedJobRole: string;
 }
 
-const GetAllJobs: React.FC = ({ jobId}) => {
+const GetAllJobs = ({ jobId }) => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [section, setSection] = useState<"jobs" | "applicants" | "">("");
   const [jobFilter, setJobFilter] = useState<string>("");
   const [applicantFilter, setApplicantFilter] = useState<string>("");
+
+  const [totalResults , setTotalResults] = useState(0);
 
   //state to track the modal 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -58,7 +63,11 @@ const GetAllJobs: React.FC = ({ jobId}) => {
   const [currentJob, setCurrentJob] = useState<Job | null>(null);
 
   //loading
-  const [loading , setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
+
+  
+  const router = useRouter();
+  
 
   //get job details by id
   useEffect(() => {
@@ -85,11 +94,11 @@ const GetAllJobs: React.FC = ({ jobId}) => {
     //take confirmation
     window.confirm("Are you sure you want to delete this job listing")
     axios
-     .delete(`http://localhost:5001/api/recruiter/delete-job-post/${jobId}`)
-     .then(() => {
-        setJobs(jobs.filter((job) => job._id!== jobId));
+      .delete(`http://localhost:5001/api/recruiter/delete-job-post/${jobId}`)
+      .then(() => {
+        setJobs(jobs.filter((job) => job._id !== jobId));
       })
-     .catch((error) => console.error("Error deleting job:", error));
+      .catch((error) => console.error("Error deleting job:", error));
   };
 
   //edit job
@@ -101,22 +110,50 @@ const GetAllJobs: React.FC = ({ jobId}) => {
         .get<Job[]>("http://localhost:5001/api/recruiter/getAlljobs")
         .then((response) => {
           console.log("Repsponse", response)
+          setTotalResults(response.data.length)
           setJobs(response.data)
         })
         .catch((error) => console.error("Error fetching jobs:", error));
 
     }
   }, [section]);
- 
-  // Fetch applicants when the applicants section is active
+
+
+  //delete applicant
+  const deleteApplicant = (applicantId: string) => {
+    //take confirmation
+    window.confirm("Are you sure you want to delete this applicant?")
+    axios
+     .delete(`http://localhost:5001/api/applicant/delete-applicant/${applicantId}`)
+     .then(() => {
+        setApplicants(applicants.filter((applicant) => applicant._id!== applicantId));
+      })
+     .catch((error) => console.error("Error deleting applicant:", error));
+  };
+
+  //view details of the applicant
+  const viewApplicantDetails = (applicantId: string)=>{
+    console.log("Navigating to ApplicantDetails page with ID:", applicantId);
+    router.push(`/recruiter-portal/application-tracking/${applicantId}`);
+  }
+
+  // Filter jobs and
+
+  // applicants details
   useEffect(() => {
     if (section === "applicants") {
       axios
-        .get<Applicant[]>("http://localhost:5001/api/users/get-users")
-        .then((response) => setApplicants(response.data))
+        .get<Applicant[]>("http://localhost:5001/api/applicant/get-applicants")
+        .then((response) => {
+          console.log("All Applicants", response.data)
+          setApplicants(response.data)
+          setTotalResults(response.data.length);
+        })
         .catch((error) => console.error("Error fetching applicants:", error));
     }
   }, [section]);
+
+  //api/applicants
 
 
   //edit button clicked
@@ -125,15 +162,15 @@ const GetAllJobs: React.FC = ({ jobId}) => {
     setCurrentJob(job);
   }
 
-    // Handle form changes
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      if (currentJob) {
-        setCurrentJob({
-          ...currentJob,
-          [e.target.name]: e.target.value,
-        });
-      }
-    };
+  // Handle form changes
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (currentJob) {
+      setCurrentJob({
+        ...currentJob,
+        [e.target.name]: e.target.value,
+      });
+    }
+  };
 
   //form submission for updating job details
   const handleUpdateJob = async (jobData) => {
@@ -200,7 +237,7 @@ const GetAllJobs: React.FC = ({ jobId}) => {
               <p>No jobs available</p>
             ) : (
               <Table>
-                <TableCaption>A list of jobs posted by your company</TableCaption>
+                <TableCaption>Showing {jobs.length} of {totalResults} results</TableCaption>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Logo</TableHead>
@@ -228,11 +265,11 @@ const GetAllJobs: React.FC = ({ jobId}) => {
                             <div className="flex flex-col gap-2 cursor-pointer">
                               <div className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-md transition-all">
                                 <Edit2 className="w-4 h-4 text-blue-500" />
-                                <span onClick={()=>hadleEditClick(job)} className="text-sm text-gray-700">Edit</span>
+                                <span onClick={() => hadleEditClick(job)} className="text-sm text-gray-700">Edit</span>
                               </div>
                               <div className="flex items-center gap-2 hover:bg-gray-100 p-2 rounded-md transition-all">
                                 <Trash2 className="w-4 h-4 text-red-500" />
-                                <span onClick={()=>deleteJob(job._id)}className="text-sm text-gray-700">Delete</span>
+                                <span onClick={() => deleteJob(job._id)} className="text-sm text-gray-700">Delete</span>
                               </div>
                             </div>
                           </PopoverContent>
@@ -263,7 +300,8 @@ const GetAllJobs: React.FC = ({ jobId}) => {
               <p>No applicants available</p>
             ) : (
               <Table>
-                <TableCaption>A list of applicants who applied to your jobs</TableCaption>
+               
+                <TableCaption> Showing {applicants.length} of {totalResults} results </TableCaption>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
@@ -280,12 +318,43 @@ const GetAllJobs: React.FC = ({ jobId}) => {
                     )
                     .map((applicant) => (
                       <TableRow key={applicant._id}>
-                        <TableCell>{applicant.fullName}</TableCell>
-                        <TableCell>{applicant.email}</TableCell>
-                        <TableCell>{applicant.role}</TableCell>
+                        <TableCell>
+                          <Link href={`/recruiter-portal/application-tracking/${applicant._id}`}>
+                            {applicant.fullName}
+                          </Link>
+                        </TableCell>
+                        <TableCell>
+                        <Link href={`/recruiter-portal/application-tracking/${applicant._id}`}>
+                          {applicant.email}
+                          </Link>
+                          </TableCell>
+                          <TableCell>
+                          <Link href={`/recruiter-portal/application-tracking/${applicant._id}`}>
+                            {applicant.appliedJobRole}
+                          </Link>
+                          </TableCell>
+                           <TableCell className="text-right">
+                            <Button
+                              className="px-4 py-2 text-sm mr-2 font-medium rounded-lg transition-all bg-green-500 text-white hover:bg-green-400"
+                              onClick={() => viewApplicantDetails(applicant._id)}
+                            > 
+                            View
+                            </Button>
+                            <Button
+                              className="px-4 py-2 text-sm font-medium rounded-lg transition-all bg-red-500 text-white hover:bg-red-400"
+                              onClick={() => deleteApplicant(applicant._id)}
+                            > 
+                            Delete
+                            </Button>
+                            </TableCell>
+                         
+                 
+                      
                       </TableRow>
                     ))}
                 </TableBody>
+
+
               </Table>
             )}
           </>
@@ -383,7 +452,7 @@ const GetAllJobs: React.FC = ({ jobId}) => {
               className="mb-4"
             />
 
-            <Button onClick={()=>handleUpdateJob(currentJob)} className="w-full mb-2">
+            <Button onClick={() => handleUpdateJob(currentJob)} className="w-full mb-2">
               Update Job
             </Button>
             <Button
@@ -397,7 +466,7 @@ const GetAllJobs: React.FC = ({ jobId}) => {
         </div>
       )}
     </>
-     
+
   );
 };
 

@@ -6,9 +6,17 @@ import Footer from '@/components/shared/Footer';
 
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
 const ApplicationForm: React.FC = () => {
   const router = useRouter();
+
+
+  const searchParams = useSearchParams();
+  //get the jobTitle from applymodal
+  const jobTitle = searchParams.get('jobTitle') || '';
+
+  
 
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
@@ -67,6 +75,9 @@ const ApplicationForm: React.FC = () => {
     if (formData.resume) {
       formDataForUpload.append("resume", formData.resume);
     }
+
+    //append applied job role in the db
+    formDataForUpload.append('appliedJobRole', jobTitle);
   
     try {
       const response = await axios.post(
@@ -112,6 +123,7 @@ const ApplicationForm: React.FC = () => {
   return (
     <>
     <Navbar/>
+    <p>Applying for job : {jobTitle}</p>
     <div className="max-w-2xl mx-auto mt-5 mb-5  p-6 bg-white shadow-lg rounded-lg">
       {/* Progress Bar */}
       <div className="mb-6">

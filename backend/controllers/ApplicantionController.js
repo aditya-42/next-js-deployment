@@ -5,6 +5,9 @@ exports.submitApplication = async (req, res, next) => {
         console.log("Received Form Data:", req.body);
         console.log("Received File:", req.file);
 
+        const appliedJobRole = req.body.appliedJobRole;
+        console.log("Received appliedRole" , appliedJobRole)
+
         if (!req.file) {
             console.log("No resume uploaded -- inside controller");
             return res.status(400).json({ message: "No resume uploaded" });
@@ -47,6 +50,7 @@ exports.submitApplication = async (req, res, next) => {
             uploadResume: resumePath, 
             linkedProfile,
             portfolioURL,
+            appliedJobRole
         });
 
         try {
@@ -85,3 +89,45 @@ exports.getAllApplications = async (req, res) => {
         res.status(500).json({ message: "Error fetching applications", error: err });
     }
 };
+
+//get all applciants data
+exports.getAllApplicantDetails = async(req,res)=>{
+    try {
+        const applications = await Application.find();
+        res.status(200).json(applications);
+    } catch (err) {
+        res.status(500).json({ message: "Error fetching applicants", error: err });
+    }
+}
+
+//get applicants details by id
+exports.getApplicantDetailsById = async(req,res)=>{
+    try {
+        const application = await Application.findById(req.params.id);
+        if (!application) {
+            return res.status(404).json({ message: "No application found with this id" });
+        }
+        res.status(200).json(application);
+    } catch (err) {
+        res.status(500).json({ message: "Error fetching application", error: err });
+    }
+}
+
+//delete applicant
+exports.deleteApplication = async (req, res) => {
+    try {
+        const application = await Application.findByIdAndDelete(req.params.id);
+        if (!application) {
+            return res.status(404).json({ message: "No application found with this id" });
+        }
+        res.status(200).json({ message: "Application deleted successfully" });
+    } catch (err) {
+        res.status(500).json({ message: "Error deleting application", error: err });
+    }
+}
+
+
+
+
+
+
