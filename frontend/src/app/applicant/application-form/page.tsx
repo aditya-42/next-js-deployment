@@ -10,7 +10,7 @@ import { useSearchParams } from 'next/navigation';
 
 const ApplicationForm: React.FC = () => {
   const router = useRouter();
-
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   const searchParams = useSearchParams();
   //get the jobTitle from applymodal
@@ -81,7 +81,7 @@ const ApplicationForm: React.FC = () => {
   
     try {
       const response = await axios.post(
-        'http://localhost:5001/api/applicant/apply',
+        `${API_URL}/api/applicant/apply`,
         formDataForUpload,
         {
           headers: {

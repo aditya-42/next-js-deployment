@@ -67,6 +67,7 @@ const GetAllJobs = ({ jobId }) => {
 
   
   const router = useRouter();
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
   
 
   //get job details by id
@@ -76,7 +77,7 @@ const GetAllJobs = ({ jobId }) => {
       const fetchJobData = async () => {
         try {
           setLoading(true);
-          const response = await axios.get(`http://localhost:5001/api/recruiter/get-job-post/${jobId}`);
+          const response = await axios.get(`${API_URL}/api/recruiter/get-job-post/${jobId}`);
           setCurrentJob(response.data);
         } catch (error) {
           console.error('Error fetching job data:', error);
@@ -94,7 +95,7 @@ const GetAllJobs = ({ jobId }) => {
     //take confirmation
     window.confirm("Are you sure you want to delete this job listing")
     axios
-      .delete(`http://localhost:5001/api/recruiter/delete-job-post/${jobId}`)
+      .delete(`${API_URL}/api/recruiter/delete-job-post/${jobId}`)
       .then(() => {
         setJobs(jobs.filter((job) => job._id !== jobId));
       })
@@ -107,7 +108,7 @@ const GetAllJobs = ({ jobId }) => {
   useEffect(() => {
     if (section === "jobs") {
       axios
-        .get<Job[]>("http://localhost:5001/api/recruiter/getAlljobs")
+        .get<Job[]>(`${API_URL}/api/recruiter/getAlljobs`)
         .then((response) => {
           console.log("Repsponse", response)
           setTotalResults(response.data.length)
@@ -124,7 +125,7 @@ const GetAllJobs = ({ jobId }) => {
     //take confirmation
     window.confirm("Are you sure you want to delete this applicant?")
     axios
-     .delete(`http://localhost:5001/api/applicant/delete-applicant/${applicantId}`)
+     .delete(`${API_URL}/api/applicant/delete-applicant/${applicantId}`)
      .then(() => {
         setApplicants(applicants.filter((applicant) => applicant._id!== applicantId));
       })
@@ -143,7 +144,7 @@ const GetAllJobs = ({ jobId }) => {
   useEffect(() => {
     if (section === "applicants") {
       axios
-        .get<Applicant[]>("http://localhost:5001/api/applicant/get-applicants")
+        .get<Applicant[]>(`${API_URL}/api/applicant/get-applicants`)
         .then((response) => {
           console.log("All Applicants", response.data)
           setApplicants(response.data)
@@ -179,7 +180,7 @@ const GetAllJobs = ({ jobId }) => {
         console.log("currentJob data before update:", jobData);
 
         const response = await axios.put(
-          `http://localhost:5001/api/recruiter/update-job-post/${jobData._id}`,
+          `${API_URL}/api/recruiter/update-job-post/${jobData._id}`,
           jobData
         );
         setJobs((prevJobs) =>

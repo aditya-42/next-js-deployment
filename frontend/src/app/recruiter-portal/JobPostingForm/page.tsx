@@ -29,6 +29,7 @@ const employmentTypes = ['Full-time', 'Part-time', 'Contract', 'Internship'];
 const JobPostingForm = () => {
   const router = useRouter();
   const [step, setStep] = useState(1);
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
   const [formData, setFormData] = useState<FormData>({
     jobTitle: '',
     employmentType: '',
@@ -82,7 +83,7 @@ const JobPostingForm = () => {
 
     // Call backend API
     try {
-      const response = await axios.post('http://localhost:5001/api/recruiter/create-job-post', dataToSubmit);
+      const response = await axios.post(`${API_URL}/api/recruiter/create-job-post`, dataToSubmit);
       console.log("Response from backend", response.data);
 
       // Clear the form

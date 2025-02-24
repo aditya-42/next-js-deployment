@@ -29,14 +29,15 @@ const ApplicantDetails = () => {
     const [status, setStatus] = useState('');
     const [applicant, setApplicant] = useState<Applicant | null>(null);
     const { id } = useParams();
-
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
+    
     const router = useRouter();
 
 
     //api to get the applicant details
     useEffect(() => {
         if (id) {
-            fetch(`http://localhost:5001/api/applicant/get-applicant-details/${id}`)
+            fetch(`${API_URL}/api/applicant/get-applicant-details/${id}`)
                 .then(res => res.json())
                 .then(data => {
                     console.log("LinkedIn:", data.linkedProfile);
@@ -114,14 +115,14 @@ const ApplicantDetails = () => {
                     <LinkButton href={applicant.linkedProfile} icon={<FaLinkedin />} text="LinkedIn" />
                     <LinkButton href={applicant.portfolioURL} icon={<FaGlobe />} text="Portfolio" />
                     <LinkButton
-                        href={`http://localhost:5001/${applicant.uploadResume}`}
+                        href={`${API_URL}/${applicant.uploadResume}`}
                         icon={<FaFileAlt />}
                         text="Resume"
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => {
                             e.preventDefault();
-                            window.open(`http://localhost:5001/${applicant.uploadResume}`, '_blank', 'noopener,noreferrer');
+                            window.open(`${API_URL}/${applicant.uploadResume}`, '_blank', 'noopener,noreferrer');
                         }}
                     />
 

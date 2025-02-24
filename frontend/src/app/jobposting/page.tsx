@@ -110,14 +110,14 @@ const JobBoard: React.FC = () => {
     const [selectedWorkType, setSelectedWorkType] = useState<string>("");
     const [datePosted, setDatePosted] = useState<string>("");
     const [mapCenter, setMapCenter] = useState<[number, number]>([56.130366, -106.346771]); // Default to Canada's center
-
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
     //fetch jobs when the component mounts
     //fetch jobs when the component mounts
  useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5001/api/recruiter/getAlljobs"
+          `${API_URL}/api/recruiter/getAlljobs`
         );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

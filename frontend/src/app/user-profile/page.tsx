@@ -16,6 +16,7 @@ interface Job {
 export default function UserProfilePage() {
     const [jobs, setJobs] = useState<Job[]>([]);
     const [user, setUser] = useState<any>(null);
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
     // fetch job applications based on the user email
     useEffect(() => {
@@ -30,7 +31,7 @@ export default function UserProfilePage() {
                 }
 
                 // API to get job application for that user
-                const applicationsResponse = await fetch(`http://localhost:5001/api/applicant/applications/${email}`, {
+                const applicationsResponse = await fetch(`${API_URL}/api/applicant/applications/${email}`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",

@@ -19,6 +19,7 @@ const LogIn: React.FC=()=> {
   const[email , setEmail] = useState("");
   const[password , setPassword] = useState("");
   const[role , setRole] = useState("");
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
  
 
   const handleSubmit = async(e)=>{
@@ -27,7 +28,7 @@ const LogIn: React.FC=()=> {
    
 
     try {
-      const response = await Axios.post("http://localhost:5001/api/users/login", { email, password  });
+      const response = await Axios.post(`${API_URL}/api/users/login`, { email, password  });
       console.log("api call has been made");
 
       

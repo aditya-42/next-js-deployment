@@ -22,6 +22,7 @@ export default function Signup() {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
   const [profile, setProfile] = useState(null);
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   // Handle file selection
   const handleFileChange = (e) => {
@@ -45,7 +46,7 @@ export default function Signup() {
     formData.append("profile", profile);
 
     try {
-      const response = await Axios.post("http://localhost:5001/api/users/create-users", formData, {
+      const response = await Axios.post(`${API_URL}/api/users/create-users`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

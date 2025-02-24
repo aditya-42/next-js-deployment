@@ -34,6 +34,7 @@ const JobDetails: React.FC = () => {
     const [job, setJob] = useState<Job | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 
     //state to check modal is open or close
@@ -47,7 +48,7 @@ const JobDetails: React.FC = () => {
             const id = params.id as string;
             if (id) {
                 try {
-                    const response = await fetch(`http://localhost:5001/api/recruiter/get-job-post/${id}`);
+                    const response = await fetch(`${API_URL}/api/recruiter/get-job-post/${id}`);
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
