@@ -7,36 +7,84 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { LogOut, Edit2, MoreHorizontal, Menu, X } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import EditProfileModal from "@/components/shared/EditProfileModal"; 
 
 interface User {
-  fullname: string;
+  _id: string;
+  fullName: string;
+  email: string;
+  phoneNumber: string;
   role: "recruiter" | "applicant" | "admin";
   profile?: string;
 }
 
-
-
 const Navbar: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState<User | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
-  
-
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-  useEffect(() => {
-    const userDetails = localStorage.getItem("user");
-    
-    console.log(userDetails);
-    const token = localStorage.getItem("token");
-
-    if (userDetails && token) {
-      setUser(JSON.parse(userDetails));
+  const [user, setUser] = useState<User | null>(() => {
+    if (typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("user");
+      return storedUser ? JSON.parse(storedUser) : null;
     }
-  }, []);
+    return null;
+  });
+  
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+  const API_URL = process.env.NEXT_PUBLIC_API_URL?.endsWith("/")
+    ? process.env.NEXT_PUBLIC_API_URL
+    : process.env.NEXT_PUBLIC_API_URL + "/";
+
+    useEffect(() => {
+      if (typeof window === "undefined") return; // ✅ 确保 `fetchUser()` 只在客户端运行
+    
+      const fetchUser = async () => {
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+          try {
+            const parsedUser: User = JSON.parse(storedUser);
+            const userId = parsedUser._id;
+    
+            if (!userId || userId === "undefined") {
+              console.error("Invalid User ID:", userId);
+              return;
+            }
+    
+            const res = await fetch(`${API_URL}api/users/me?id=${userId}`);
+            if (!res.ok) throw new Error(`Failed to fetch user: ${res.status}`);
+    
+            const data: User = await res.json();
+            setUser(prevUser => ({
+              ...(prevUser || {}), // ✅ 确保 `prevUser` 不是 `null`
+              _id: userId,
+              fullName: data.fullName || parsedUser.fullName,
+              profile: data.profile || parsedUser.profile,
+              email: data.email || parsedUser.email,
+              phoneNumber: data.phoneNumber || parsedUser.phoneNumber,
+              role: data.role || parsedUser.role,
+            }));
+    
+            localStorage.setItem("user", JSON.stringify({
+              ...parsedUser,
+              profile: data.profile,
+            }));
+    
+            console.log("🚀 Fetched user - profile:", data.profile);
+          } catch (error) {
+            console.error("Error fetching user data:", error);
+          }
+        }
+      };
+    
+      fetchUser();
+    }, []);
+    
+    
+      
+     
+    
+
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -44,195 +92,119 @@ const Navbar: React.FC = () => {
     router.push("/auth/login");
   };
 
-  const isActive = (path: string) =>
-    pathname === path ? "text-[#6A38C2] font-semibold border-b-2 border-[#6A38C2]" : "text-gray-600";
+  const handleProfileSave = async (newUsername: string, newProfilePic: File | null) => {
+    if (!user || !user._id) {
+      console.error("Cannot update user: user ID is missing!");
+      return;
+    }
+  
+    const formData = new FormData();
+    formData.append("fullName", newUsername);
+    if (newProfilePic) {
+      formData.append("profile", newProfilePic);
+    }
+  
+    const res = await fetch(`${API_URL}api/users/update-user-profile/${user._id}`, {
+      method: "PUT",
+      body: formData,
+    });
+  
+    if (res.ok) {
+      const updatedUser = await res.json();
+      const mergedUser = { ...user, ...updatedUser };
+  
+      setUser(mergedUser);
+      localStorage.setItem("user", JSON.stringify(mergedUser));
+  
+      // ✅ 解决缓存问题，强制刷新 `AvatarImage`
+      setTimeout(() => setUser({ ...mergedUser }), 100);
+  
+      setIsModalOpen(false);
+    } else {
+      console.error("Failed to update user profile:", await res.json());
+    }
+  };
+  
+  console.log("🚀 Navbar - user.profile:", user?.profile);
+  console.log("🚀 Navbar - Final Avatar URL:", user?.profile ? `${API_URL}${user.profile.replace(/\\/g, "/")}` : "No profile found");
 
   return (
-    <nav className="bg-white shadow-lg">
-      <div className="flex items-center justify-between max-w-7xl mx-auto h-16 px-6 lg:px-8">
-        {/* Logo */}
-        <Link href={user?.role === "recruiter" ? "/recruiter-portal/RecruiterHeroSection" : "/"} className="text-3xl font-bold text-[#F83002]">
-          Tech<span className="text-black">Titans</span>
-        </Link>
+    <>
+      <nav className="bg-white shadow-lg">
+        <div className="flex items-center justify-between max-w-7xl mx-auto h-16 px-6 lg:px-8">
+          <Link href="/" className="text-3xl font-bold text-[#F83002]">
+            Tech<span className="text-black">Titans</span>
+          </Link>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-8">
-          <ul className="flex items-center gap-6 font-medium">
-            {user?.role === "recruiter" ? (
-              <>
-                <li>
-                  <Link href="/recruiter-portal/jobposting-welcome" className={`text-lg hover:text-[#6A38C2] transition duration-200 ${isActive("/recruiter-portal/jobposting-welcome")}`}>
-                    Post a Job
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/recruiter-portal/getAllJobs" className={`text-lg hover:text-[#6A38C2] transition duration-200 ${isActive("/recruiter-portal/getAllJobs")}`}>
-                    Manage Applications
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/" className={`text-lg hover:text-[#6A38C2] transition duration-200 ${isActive("/")}`}>
-                    Job Analytics
-                  </Link>
-                </li>
-              </>
-            ) : user?.role === "applicant" ? (
-              <>
-                <li>
-                  <Link href="/" className={`text-lg hover:text-[#6A38C2] transition duration-200 ${isActive("/")}`}>
-                    Home
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/jobposting" className={`text-lg hover:text-[#6A38C2] transition duration-200 ${isActive("/jobposting")}`}>
-                    Browse Jobs
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/user-profile" className={`text-lg hover:text-[#6A38C2] transition duration-200 ${isActive("/user-profile")}`}>
-                    My Applications
-                  </Link>
-                </li>
-                <li>
-                  {/* <Link href="/" className={`text-lg hover:text-[#6A38C2] transition duration-200 ${isActive("/resume-builder")}`}>
-                    Resume Builder
-                  </Link> */}
-                </li>
-              </>
-            ) : null}
-
-            {!user && (
-              <li>
-                <Link href="/jobposting" className={`text-lg hover:text-[#6A38C2] transition duration-200 ${isActive("/jobposting")}`}>
-                  Browse Jobs
-                </Link>
-              </li>
-            )}
-          </ul>
-
-          {/* User Actions */}
-          {!user ? (
-            <div className="flex items-center gap-3">
-              <Link href="/auth/login">
-                <Button className="bg-[#6A38C2]">Login</Button>
-              </Link>
-              <Link href="/auth/signup">
-                <Button className="bg-[#6A38C2]">Signup</Button>
-              </Link>
-            </div>
-          ) : (
-            <div className="flex items-center gap-4">
-              <Avatar>
-                <AvatarImage src={`${API_URL}/${user.profile}`}
-              </Avatar>
-
-              <Popover>
-                <PopoverTrigger>
-                  <MoreHorizontal />
-                </PopoverTrigger>
-                <PopoverContent className="w-32">
-                  <div className="flex items-center gap-2 w-fit cursor-pointer">
-                    <Edit2 className="w-4" />
-                    <span>Edit Profile</span>
-                  </div>
-                </PopoverContent>
-              </Popover>
-
-              <Button className="bg-[#6A38C2] text-white flex items-center gap-2" onClick={handleLogout}>
-                <LogOut />
-                Logout
-              </Button>
-            </div>
-          )}
-        </div>
-
-        {/* Mobile Menu Button */}
-        <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden">
-          {menuOpen ? <X size={28} /> : <Menu size={28} />}
-        </button>
-      </div>
-
-      {/* Mobile Navigation */}
-      {menuOpen && (
-        <div className="md:hidden bg-white shadow-md">
-          <ul className="flex flex-col p-4 space-y-4">
-            {user?.role === "recruiter" ? (
-              <>
-                <li>
-                  <Link href="/recruiter-portal/jobposting-welcome" className={`block text-lg ${isActive("/recruiter-portal/jobposting-welcome")}`}>
-                    Post a Job
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/recruiter-portal/getAllJobs" className={`block text-lg ${isActive("/recruiter-portal/getAllJobs")}`}>
-                    Manage Applications
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/" className={`block text-lg ${isActive("/")}`}>
-                    Job Analytics
-                  </Link>
-
-                </li>
-                <Avatar>
-
-                  <AvatarImage src={`${API_URL}/${user.profile}`} />
-                </Avatar>
-
-              </>
-            ) : user?.role === "applicant" ? (
-              <>
-                <li>
-                  <Link href="/" className={`block text-lg ${isActive("/")}`}>
-                    Home
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/jobposting" className={`block text-lg ${isActive("/jobposting")}`}>
-                    Browse Jobs
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/user-profile" className={`block text-lg ${isActive("/user-profile")}`}>
-                    My Applications
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/resume-builder" className={`block text-lg ${isActive("/")}`}>
-                    Resume Builder
-                  </Link>
-
-                </li>
-              </>
-            ) : null}
-
-            {!user && (
-              <li>
-                <Link href="/jobposting" className={`block text-lg ${isActive("/jobposting")}`}>
-                  Browse Jobs
-                </Link>
-              </li>
-            )}
-
+          <div className="hidden md:flex items-center gap-8">
             {!user ? (
-              <div className="flex flex-col gap-2 mt-4">
+              <div className="flex items-center gap-3">
                 <Link href="/auth/login">
-                  <Button className="w-full bg-[#6A38C2]">Login</Button>
+                  <Button className="bg-[#6A38C2]">Login</Button>
                 </Link>
                 <Link href="/auth/signup">
-                  <Button className="w-full bg-[#6A38C2]">Signup</Button>
+                  <Button className="bg-[#6A38C2]">Signup</Button>
                 </Link>
               </div>
             ) : (
-              <Button className="w-full bg-[#6A38C2] mt-4" onClick={handleLogout}>
-                <LogOut className="mr-2" />
-                Logout
-              </Button>
+              <div className="flex items-center gap-4">
+                
+                <Avatar>
+                {user?.profile && (
+                  <AvatarImage 
+                    key={user.profile} // ✅ 确保 `AvatarImage` 重新渲染
+                    src={`${API_URL.replace(/\/$/, "")}/${user.profile.replace(/^\/+/, "").replace(/\\/g, "/")}`} 
+                    alt="User Avatar"
+                    onLoad={() => console.log("✅ Avatar Image Loaded:", user.profile)}
+                    onError={(e) => {
+                      console.error("🚨 Avatar Image failed to load:", e.currentTarget.src);
+                    }}
+                  />
+                )}
+
+                </Avatar>
+
+
+
+
+                <Popover>
+                  <PopoverTrigger>
+                    <MoreHorizontal />
+                  </PopoverTrigger>
+                  <PopoverContent className="w-32">
+                    <div className="flex items-center gap-2 w-fit cursor-pointer"
+                      onClick={() => setIsModalOpen(true)}>
+                      <Edit2 className="w-4" />
+                      <span>Edit Profile</span>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+
+                <Button className="bg-[#6A38C2] text-white flex items-center gap-2" onClick={handleLogout}>
+                  <LogOut />
+                  Logout
+                </Button>
+              </div>
             )}
-          </ul>
+          </div>
+
+          <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden">
+            {menuOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
         </div>
+      </nav>
+
+      {user && (
+        <EditProfileModal 
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSave={handleProfileSave}
+          currentUsername={user.fullName || ""}
+          currentProfile={user.profile || ""} // ✅ 确保 `profile` 传递给 Modal
+        />
       )}
-    </nav>
+
+    </>
   );
 };
 

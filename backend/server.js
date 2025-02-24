@@ -36,7 +36,7 @@ app.use(express.json());
 
 
 
-
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/uploads", express.static("uploads"));
 app.use("/uploads/resumes", express.static("uploads/resumes"));
 app.use("/uploads/profile-images", express.static("uploads/profile-images"));
