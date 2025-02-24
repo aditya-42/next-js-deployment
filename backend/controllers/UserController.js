@@ -141,6 +141,92 @@ const deleteUser = async (req, res) => {
   }
 };
 
+
+
+
+/*
+const getUserProfile = async (req, res) => {
+  try {
+    const userId = req.query.id;
+    if (!userId) return res.status(400).json({ message: "User ID is required" });
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.json({
+      fullname: user.fullname,
+      profile: user.profile ? user.profile.replace(/\\/g, "/") : "", // ✅ 修正路径
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+*/
+const getUserProfile = async (req, res) => {
+  try {
+    const userId = req.query.id;
+
+    // ✅ 修正 undefined 的情况
+    if (!userId || userId === "undefined" || userId.trim() === "") {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.json({
+      id: user._id,
+      fullName: user.fullname,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      role: user.role,
+      profile: user.profile ? user.profile.replace(/\\/g, "/") : "",
+    });
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+
+
+
+const updateUserAndProfile = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    if (!userId) return res.status(400).json({ message: "User ID is required" });
+
+    const updatedData = {};
+    
+    if (req.body.fullName) {
+      updatedData.fullName = req.body.fullName;
+    }
+
+    if (req.file) {
+      updatedData.profile = `/uploads/profile-images/${req.file.filename}`;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updatedData, { new: true });
+
+    if (!updatedUser) return res.status(404).json({ message: "User not found" });
+
+    res.json({
+      id: updatedUser._id,
+      fullName: updatedUser.fullName, // ✅ 这里是 fullName
+      email: updatedUser.email,
+      phoneNumber: updatedUser.phoneNumber,
+      role: updatedUser.role,
+      profile: updatedUser.profile,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Update failed" });
+  }
+};
+
+
+
+
 module.exports = {
   createUser,
   loginUser,
@@ -148,4 +234,6 @@ module.exports = {
   getUserById,
   updateUser,
   deleteUser,
+  getUserProfile, 
+  updateUserAndProfile
 };

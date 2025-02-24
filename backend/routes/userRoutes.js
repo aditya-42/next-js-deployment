@@ -41,6 +41,10 @@ router.post('/create-users',upload.single('profile') , userController.createUser
 router.post('/login', userController.loginUser); //login user
 
 
+// get current user
+router.get('/me', userController.getUserProfile);
+// updates username and profile (so it won't conflict with the exsting one)
+router.put('/update-user-profile/:id', upload.single('profile'), userController.updateUserAndProfile);
 
 
 router.get('/get-users', userController.getUsers); //all users
