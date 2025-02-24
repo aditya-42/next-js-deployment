@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Navbar from "../../../components/shared/Navbar";
 import Footer from '@/components/shared/Footer';
 
-import { Briefcase, DollarSign, MapPin, Calendar, Share2 } from "lucide-react";
+
 
 import ApplyModal from '@/components/ApplyModal/page';
 
@@ -137,7 +137,10 @@ const JobDetails: React.FC = () => {
                             Apply Now
                         </button>
 
-                        {isModalOpen && <ApplyModal closeModal ={handleCloseModal}/>}
+                         {/* //modal opening  */}
+                        {isModalOpen && <ApplyModal closeModal ={handleCloseModal} jobTitle={job.jobTitle}/>}
+
+
                         <button className="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-6 rounded transition"
                             onClick={() => router.back()}>
                             Back to Job Board

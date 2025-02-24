@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import JobList from "@/components/JobList";
 import Navbar from "@/components/shared/Navbar";
+import Footer from "@/components/shared/Footer";
 
 
 interface Job {
@@ -41,9 +42,15 @@ export default function UserProfilePage() {
                 }
 
                 const applicationsData = await applicationsResponse.json();
-                console.log("application info", applicationsData[0]);
-                setUser(applicationsData[0]);
-                setJobs(applicationsData);
+                console.log("application info", applicationsData);
+
+                if (Array.isArray(applicationsData) && applicationsData.length > 0) {
+                    setUser(applicationsData[0]);
+                    setJobs(applicationsData);
+                } else {
+                    setJobs([]); 
+                    setUser(null); 
+                }
             } catch (error) {
                 console.error("Error fetching job applications:", error);
             }
@@ -52,9 +59,17 @@ export default function UserProfilePage() {
         fetchJobApplications();
     }, []);
 
-    if (!user) {
-        return <div>Loading...</div>;
+    if (!user && jobs.length === 0) {
+        return (
+            <>
+                <Navbar />
+                <div className="max-w-4xl mx-auto bg-white border border-gray-200 rounded-2xl my-5 p-8 shadow-lg">
+                    <p>No applications found.</p>
+                </div>
+            </>
+        );
     }
+    
 
 
     //get initials 
@@ -134,12 +149,12 @@ export default function UserProfilePage() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                        <span className="font-medium text-lg text-gray-700">Skills:</span>
-                        <span className="text-gray-600 ">{user.skills}</span>
-                    </div>
+                    <span className="font-medium text-lg text-gray-700">Skills:</span>
+                    <span className="text-gray-600 ">{user.skills}</span>
+                </div>
 
-               
-             
+
+
 
 
 
@@ -153,11 +168,17 @@ export default function UserProfilePage() {
 
 
             {/* Applied Jobs Section */}
+            <div className="mb-20">
             {jobs.length > 0 ? (
                 <JobList jobs={jobs} />
             ) : (
                 <p>No applications found.</p>
             )}
+            </div>
+
+            <Footer/>
+
+
 
         </>
     );

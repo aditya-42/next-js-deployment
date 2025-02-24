@@ -62,7 +62,7 @@ const getJobPosts = async (req, res) => {
   try {
     console.log("Frontend has made request");
     const jobPosts = await JobPost.find();
-    console.log("Got all the jobs", jobPosts);
+    //console.log("Got all the jobs", jobPosts);
     res.status(200).json(jobPosts);
   } catch (error) {
     res.status(400).json({ message: error.message });
