@@ -21,12 +21,12 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose, on
   const [username, setUsername] = useState(currentUsername || "");
   const [profilePic, setProfilePic] = useState<File | null>(null);
 
-  // ✅ 确保 Modal 重新打开时，显示正确的 `currentProfile`，不显示之前的选择
+  // present correct modal instead of the previous one
   useEffect(() => {
     console.log("🚀 EditProfileModal - currentProfile:", currentProfile);
     setUsername(currentUsername || "");
     setProfilePic(null); 
-  }, [isOpen, currentUsername, currentProfile]); // ✅ 监听 `currentProfile`
+  }, [isOpen, currentUsername, currentProfile]); // listen `currentProfile`
   
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
