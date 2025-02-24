@@ -166,7 +166,7 @@ const getUserProfile = async (req, res) => {
   try {
     const userId = req.query.id;
 
-    // ✅ 修正 undefined 的情况
+    // fix undefined issues
     if (!userId || userId === "undefined" || userId.trim() === "") {
       return res.status(400).json({ message: "User ID is required" });
     }
@@ -213,7 +213,7 @@ const updateUserAndProfile = async (req, res) => {
 
     res.json({
       id: updatedUser._id,
-      fullName: updatedUser.fullName, // ✅ 这里是 fullName
+      fullName: updatedUser.fullName, // fullName
       email: updatedUser.email,
       phoneNumber: updatedUser.phoneNumber,
       role: updatedUser.role,

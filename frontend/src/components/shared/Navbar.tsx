@@ -37,7 +37,7 @@ const Navbar: React.FC = () => {
     : process.env.NEXT_PUBLIC_API_URL + "/";
 
     useEffect(() => {
-      if (typeof window === "undefined") return; // ✅ 确保 `fetchUser()` 只在客户端运行
+      if (typeof window === "undefined") return; // amke sure fetchUser only works in Client
     
       const fetchUser = async () => {
         const storedUser = localStorage.getItem("user");
@@ -56,7 +56,7 @@ const Navbar: React.FC = () => {
     
             const data: User = await res.json();
             setUser(prevUser => ({
-              ...(prevUser || {}), // ✅ 确保 `prevUser` 不是 `null`
+              ...(prevUser || {}), // make sure it's prevUser not null
               _id: userId,
               fullName: data.fullName || parsedUser.fullName,
               profile: data.profile || parsedUser.profile,
@@ -116,7 +116,7 @@ const Navbar: React.FC = () => {
       setUser(mergedUser);
       localStorage.setItem("user", JSON.stringify(mergedUser));
   
-      // ✅ 解决缓存问题，强制刷新 `AvatarImage`
+      // force refreshing avatar image
       setTimeout(() => setUser({ ...mergedUser }), 100);
   
       setIsModalOpen(false);
@@ -152,7 +152,7 @@ const Navbar: React.FC = () => {
                 <Avatar>
                 {user?.profile && (
                   <AvatarImage 
-                    key={user.profile} // ✅ 确保 `AvatarImage` 重新渲染
+                    key={user.profile} 
                     src={`${API_URL.replace(/\/$/, "")}/${user.profile.replace(/^\/+/, "").replace(/\\/g, "/")}`} 
                     alt="User Avatar"
                     onLoad={() => console.log("✅ Avatar Image Loaded:", user.profile)}
@@ -200,7 +200,7 @@ const Navbar: React.FC = () => {
           onClose={() => setIsModalOpen(false)}
           onSave={handleProfileSave}
           currentUsername={user.fullName || ""}
-          currentProfile={user.profile || ""} // ✅ 确保 `profile` 传递给 Modal
+          currentProfile={user.profile || ""} 
         />
       )}
 
