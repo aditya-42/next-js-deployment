@@ -21,17 +21,22 @@ const Navbar: React.FC = () => {
   const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
     const userDetails = localStorage.getItem("user");
+    
+    console.log(userDetails);
     const token = localStorage.getItem("token");
 
     if (userDetails && token) {
       setUser(JSON.parse(userDetails));
     }
   }, []);
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -118,8 +123,7 @@ const Navbar: React.FC = () => {
           ) : (
             <div className="flex items-center gap-4">
               <Avatar>
-                <AvatarImage src={`${API_URL}/${user.profile}`} />
-                {/* <AvatarImage src="https://github.com/shadcn.png" /> */}
+                <AvatarImage src={`${API_URL}/${user.profile}`}
               </Avatar>
 
               <Popover>
